@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="Generate strong, memorable passwords with DevOps themed vocabulary">
+  <meta name="theme-color" content="#667eea">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Password Gen">
+  <title>Password Generator - Strong & Secure</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-attachment: fixed;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    .container {
+      max-width: 450px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 30px;
+      font-size: 24px;
+    }
+    
+    .password-display {
+      background: #ecf0f1;
+      border: 2px solid #bdc3c7;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      text-align: center;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    #password {
+      font-family: 'Courier New', monospace;
+      font-size: 16px;
+      color: #34495e;
+      font-weight: bold;
+      word-break: break-all;
+    }
+    
+    .button-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    button {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: white;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      min-height: 48px;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    
+    #generateBtn {
+      background: #3498db;
+    }
+    
+    #generateBtn:hover {
+      background: #2980b9;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+    }
+    
+    #copyBtn {
+      background: #2ecc71;
+    }
+    
+    #copyBtn:hover {
+      background: #27ae60;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    .status {
+      text-align: center;
+      min-height: 25px;
+      color: #27ae60;
+      font-size: 14px;
+      font-weight: 500;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .status.show {
+      opacity: 1;
+    }
+    
+    .info {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #3498db;
+    }
+    
+    .info h3 {
+      font-size: 14px;
+      color: #2c3e50;
+      margin-bottom: 8px;
+    }
+    
+    .info ul {
+      margin-left: 20px;
+      font-size: 12px;
+      color: #7f8c8d;
+    }
+    
+    .info li {
+      margin-bottom: 5px;
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        padding: 15px;
+      }
+      
+      .container {
+        padding: 25px;
+      }
+      
+      h1 {
+        font-size: 22px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      
+      .container {
+        padding: 20px;
+      }
+      
+      h1 {
+        font-size: 20px;
+        margin-bottom: 20px;
+      }
+      
+      #password {
+        font-size: 16px;
+      }
+      
+      .button-container {
+        flex-direction: column;
+      }
+      
+      button {
+        width: 100%;
+        padding: 16px;
+        font-size: 15px;
+      }
+      
+      .info ul {
+        font-size: 13px;
+      }
+    }
+    
+    @media (max-width: 360px) {
+      .container {
+        padding: 15px;
+      }
+      
+      h1 {
+        font-size: 18px;
+      }
+      
+      #password {
+        font-size: 14px;
+      }
+    }
+    
+    @media (hover: none) {
+      button:hover {
+        transform: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔐 Strong Password Generator</h1>
+    
+    <div class="password-display">
+      <div id="password">Click Generate to create a password</div>
+    </div>
+    
+    <div class="button-container">
+      <button id="generateBtn" onclick="generateNewPassword()">
+        🔄 Generate Password
+      </button>
+      <button id="copyBtn" onclick="copyToClipboard()">
+        📋 Copy to Clipboard
+      </button>
+    </div>
+    
+    <div class="status" id="status"></div>
+    
+    <div class="info">
+      <h3>🛡️ Password Features:</h3>
+      <ul>
+        <li>16-18 characters long</li>
+        <li>Memorable word-based patterns</li>
+        <li>Includes numbers and symbols</li>
+        <li>DevOps/Tech themed vocabulary</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // Password generation logic (client-side)
+    const WORDS = [
+      // general
+      "travel","coffee","dragon","forest","sunrise","canvas","rocket","whisper",
+      "timber","velocity","wander","echo","ember","quantum","matrix","crystal",
+      "harbor","atlas","fusion","shadow","storm","planet","orbit","signal",
+      "charge","vector","pixel","binary","cipher","hunter","falcon","tiger",
+      "wolf","eagle","ninja","samurai","knight","vortex","nova","comet",
+      "nebula","galaxy","cosmic","plasma","gravity","energy","light","dark",
+      "silent","rapid","bold","frozen","wild","brave","sharp","swift",
+      "smart","giant","tiny","lunar","solar","metal","iron","steel",
+      "stone","flame","spark","cloud","rain","wind","snow","thunder",
+      "power","drive","build","create","shift","break","grow","run",
+      "jump","think","move","watch","scan","hack","code","debug",
+      "deploy","push","pull","merge","commit","branch","stack","queue",
+      
+      // actions
+      "build","deploy","scale","monitor","debug","commit","merge","branch",
+      "release","backup","restore","secure","harden","scan","test","verify",
+      "compile","package","ship","provision","configure","orchestrate",
+      "optimize","observe","automate","log","trace","alert",
+      
+      // dev / languages
+      "python","java","golang","node","react","angular","flask","django",
+      "spring","dotnet","kotlin","rust","bash","powershell",
+      
+      // cloud / infra
+      "aws","azure","gcp","docker","kubernetes","terraform","ansible",
+      "packer","helm","jenkins","gitlab","github","bitbucket",
+      "vpc","subnet","firewall","loadbalancer","gateway","dns","cdn",
+      
+      // sre concepts
+      "latency","uptime","throughput","reliability","availability",
+      "scalability","resilience","capacity","incident","postmortem",
+      "slo","sla","slis","errorbudget",
+      
+      // security
+      "token","secret","vault","cipher","hash","salt","keypair","oauth",
+      "kerberos","cert","tls","https","zeroTrust"
+    ];
+    
+    const SYMBOLS = "!@#$%^&*?";
+    
+    function randomWord() {
+      const word = WORDS[Math.floor(Math.random() * WORDS.length)];
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    }
+    
+    function generatePassword(minLength = 16, maxLength = 18) {
+      let pwd = "";
+      let attempts = 0;
+      
+      while (attempts < 50) {
+        const w1 = randomWord();
+        const w2 = randomWord();
+        const w3 = randomWord();
+        const num = String(Math.floor(Math.random() * (9999 - 10 + 1)) + 10);
+        const sym = SYMBOLS.charAt(Math.floor(Math.random() * SYMBOLS.length));
+        
+        const patterns = [
+          `${w1}${sym}${num}${w2}`,
+          `${w1}${w2}${sym}${num}`,
+          `${w1}${sym}${num}${w2}${w3}`,
+          `${w1}${sym}${w2}${num}`,
+          `${w1}${w2}${sym}${num}${w3}`
+        ];
+        
+        pwd = patterns[Math.floor(Math.random() * patterns.length)];
+        
+        if (pwd.length >= minLength && pwd.length <= maxLength) {
+          return pwd;
+        }
+        
+        attempts++;
+      }
+      
+      if (pwd.length > maxLength) {
+        pwd = pwd.substring(0, maxLength);
+      }
+      
+      return pwd;
+    }
+    
+    function generateNewPassword() {
+      const passwordEl = document.getElementById('password');
+      const password = generatePassword();
+      passwordEl.textContent = password;
+      showStatus(`✓ Password generated! Length: ${password.length}`, 'success');
+    }
+    
+    function copyToClipboard() {
+      const password = document.getElementById('password').textContent;
+      
+      if (password && password !== 'Click Generate to create a password' && password !== 'Generating...') {
+        // Modern Clipboard API with fallback
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(password)
+            .then(() => {
+              showStatus('✓ Password copied to clipboard!', 'success');
+            })
+            .catch(() => {
+              fallbackCopyToClipboard(password);
+            });
+        } else {
+          fallbackCopyToClipboard(password);
+        }
+      } else {
+        showStatus('⚠ Generate a password first!', 'error');
+      }
+    }
+    
+    function fallbackCopyToClipboard(text) {
+      const tempInput = document.createElement('textarea');
+      tempInput.value = text;
+      tempInput.style.position = 'fixed';
+      tempInput.style.left = '-9999px';
+      tempInput.setAttribute('readonly', '');
+      document.body.appendChild(tempInput);
+      
+      // For iOS compatibility
+      if (navigator.userAgent.match(/ipad|ipod|iphone/i)) {
+        tempInput.contentEditable = true;
+        tempInput.readOnly = true;
+        const range = document.createRange();
+        range.selectNodeContents(tempInput);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        tempInput.setSelectionRange(0, 999999);
+      } else {
+        tempInput.select();
+      }
+      
+      try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+          showStatus('✓ Password copied to clipboard!', 'success');
+        } else {
+          showStatus('⚠ Failed to copy password', 'error');
+        }
+      } catch (err) {
+        showStatus('⚠ Failed to copy password', 'error');
+      }
+      
+      document.body.removeChild(tempInput);
+    }
+    
+    function showStatus(message, type) {
+      const statusEl = document.getElementById('status');
+      statusEl.textContent = message;
+      statusEl.style.color = type === 'error' ? '#e74c3c' : '#27ae60';
+      statusEl.classList.add('show');
+      
+      setTimeout(function() {
+        statusEl.classList.remove('show');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

@@ -1,11 +1,11 @@
-# 🔐 Password Generator App
+# � Passkee - Password Generator
 
-A powerful, feature-rich password generator with 800+ curated words across multiple themes. Fully responsive, works on all modern browsers, and includes advanced customization options.
+A powerful, feature-rich password generator with word-based patterns. Fully responsive, works on all modern browsers, and includes advanced customization options.
 
 ## ✨ Features
 
 ### Core Features
-- ✅ Generates customizable passwords (8-32 characters)
+- ✅ Generates customizable passwords (8-16 characters)
 - ✅ **800+ curated words** across 4 comprehensive themes
   - **DevOps** (200+ words): CI/CD, containers, cloud, IaC, monitoring, networking
   - **Nature** (200+ words): Landscapes, weather, flora, fauna, celestial, elements

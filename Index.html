@@ -879,20 +879,23 @@
         <div class="toggle-options">
           <label class="toggle-item">
             <input type="checkbox" id="includeSymbols" checked onchange="saveSettings()">
-            <span>!@#$%</span>
+            <span>Symbols</span>
           </label>
           <label class="toggle-item">
             <input type="checkbox" id="includeNumbers" checked onchange="saveSettings()">
-            <span>0-9</span>
+            <span>Numbers</span>
           </label>
           <label class="toggle-item">
             <input type="checkbox" id="includeWords" checked onchange="saveSettings()">
-            <span>🎯 Words</span>
+            <span>🧠 Memorable words</span>
           </label>
           <label class="toggle-item">
             <input type="checkbox" id="useOnlineWords" onchange="saveSettings()">
             <span>🌐 Online</span>
           </label>
+        </div>
+        <div style="margin-top: 8px; font-size: 12px; color: var(--text-secondary);">
+          Use word patterns plus digits and symbols for strong, easier-to-remember passwords.
         </div>
       </div>
     </div>
@@ -973,55 +976,101 @@
       return charset.charAt(Math.floor(Math.random() * charset.length));
     }
     
-    function generatePassword(minLength = 16, maxLength = 24) {
-      // Use settings length if available
-      minLength = settings.length || 16;
-      maxLength = settings.length + 4 || 24;
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    
+    function randomDigitSequence(length = 2) {
+      let digits = '';
+      for (let i = 0; i < length; i++) {
+        digits += randomChar(NUMBERS);
+      }
+      return digits;
+    }
+
+    function shuffleString(str) {
+      return str.split('').sort(() => Math.random() - 0.5).join('');
+    }
+    
+    function ensureRequiredTypes(password, targetLength) {
+      const required = [];
+      if (!/[a-z]/.test(password)) required.push(randomChar(LOWERCASE));
+      if (!/[A-Z]/.test(password)) required.push(randomChar(UPPERCASE));
+      if (settings.includeNumbers && !/[0-9]/.test(password)) required.push(randomChar(NUMBERS));
+      if (settings.includeSymbols && !/[!@#$%^&*?]/.test(password)) required.push(randomChar(SYMBOLS));
       
-      let pwd = "";
-      let attempts = 0;
+      if (required.length === 0) {
+        return password;
+      }
       
-      if (settings.includeWords) {
-        while (attempts < 50) {
-          const w1 = randomWord();
-          const w2 = randomWord();
-          const w3 = randomWord();
-          const num = String(Math.floor(Math.random() * (9999 - 10 + 1)) + 10);
-          const sym = settings.includeSymbols ? SYMBOLS.charAt(Math.floor(Math.random() * SYMBOLS.length)) : '';
-          
-          const patterns = settings.includeSymbols ? [
-            `${w1}${sym}${num}${w2}`,
-            `${w1}${w2}${sym}${num}`,
-            `${w1}${sym}${num}${w2}${w3}`,
-            `${w1}${sym}${w2}${num}`,
-            `${w1}${w2}${sym}${num}${w3}`
-          ] : [
-            `${w1}${num}${w2}`,
-            `${w1}${w2}${num}`,
-            `${w1}${num}${w2}${w3}`
-          ];
-          
-          pwd = patterns[Math.floor(Math.random() * patterns.length)];
-          
-          if (pwd.length >= minLength && pwd.length <= maxLength) {
-            return pwd;
-          }
-          
-          attempts++;
+      password = password.slice(0, Math.max(0, targetLength - required.length));
+      return shuffleString(password + required.join(''));
+    }
+    
+    function generateMemorablePassword(length) {
+      const wordCount = length <= 12 ? 2 : 3;
+      const words = [];
+      while (words.length < wordCount) {
+        const nextWord = randomWord();
+        if (!words.includes(nextWord)) {
+          words.push(nextWord);
         }
-        
-        if (pwd.length > maxLength) {
-          pwd = pwd.substring(0, maxLength);
+      }
+      
+      const numberPiece = settings.includeNumbers ? randomDigitSequence(getRandomInt(2, 4)) : '';
+      const symbolPiece = settings.includeSymbols ? randomChar(SYMBOLS) : '';
+      const patterns = [];
+      
+      if (settings.includeSymbols && settings.includeNumbers) {
+        patterns.push(`${words[0]}${symbolPiece}${numberPiece}${words[1]}`);
+        patterns.push(`${words[0]}${numberPiece}${symbolPiece}${words[1]}`);
+        patterns.push(`${words[0]}${symbolPiece}${words[1]}${numberPiece}`);
+        if (wordCount === 3) {
+          patterns.push(`${words[0]}${symbolPiece}${words[1]}${numberPiece}${words[2]}`);
+          patterns.push(`${words[0]}${numberPiece}${words[1]}${symbolPiece}${words[2]}`);
+        }
+      } else if (settings.includeSymbols) {
+        patterns.push(`${words[0]}${symbolPiece}${words[1]}`);
+        if (wordCount === 3) {
+          patterns.push(`${words[0]}${symbolPiece}${words[1]}${symbolPiece}${words[2]}`);
+        }
+      } else if (settings.includeNumbers) {
+        patterns.push(`${words[0]}${numberPiece}${words[1]}`);
+        if (wordCount === 3) {
+          patterns.push(`${words[0]}${numberPiece}${words[1]}${numberPiece}${words[2]}`);
         }
       } else {
-        // Character-based generation
-        let charset = LOWERCASE + UPPERCASE;
-        if (settings.includeNumbers) charset += NUMBERS;
-        if (settings.includeSymbols) charset += SYMBOLS;
-        
-        for (let i = 0; i < minLength; i++) {
+        patterns.push(`${words[0]}${words[1]}`);
+        if (wordCount === 3) {
+          patterns.push(`${words[0]}${words[1]}${words[2]}`);
+        }
+      }
+      
+      let pwd = patterns[Math.floor(Math.random() * patterns.length)];
+      const charset = LOWERCASE + UPPERCASE + (settings.includeNumbers ? NUMBERS : '') + (settings.includeSymbols ? SYMBOLS : '');
+      while (pwd.length < length) {
+        pwd += randomChar(charset);
+      }
+      
+      if (pwd.length > length) {
+        pwd = pwd.slice(0, length);
+      }
+      
+      return ensureRequiredTypes(pwd, length);
+    }
+    
+    function generatePassword() {
+      const targetLength = Math.max(8, Math.min(24, settings.length || 16));
+      let pwd = '';
+      
+      if (settings.includeWords) {
+        pwd = generateMemorablePassword(targetLength);
+      } else {
+        const charset = LOWERCASE + UPPERCASE + (settings.includeNumbers ? NUMBERS : '') + (settings.includeSymbols ? SYMBOLS : '');
+        for (let i = 0; i < targetLength; i++) {
           pwd += randomChar(charset);
         }
+        pwd = ensureRequiredTypes(pwd, targetLength);
       }
       
       return pwd;

@@ -124,6 +124,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: 8px;
     }
     
     #password {
@@ -132,6 +133,52 @@
       color: var(--text-primary);
       font-weight: 600;
       word-break: break-all;
+    }
+
+    #password.is-hidden {
+      letter-spacing: 3px;
+    }
+
+    .password-visibility {
+      flex: 0 0 auto;
+      width: 36px;
+      min-height: 36px;
+      padding: 4px;
+      border: 1px solid var(--border-color);
+      background: transparent;
+      color: var(--text-primary);
+      font-size: 16px;
+      border-radius: 50%;
+    }
+
+    .password-visibility:hover {
+      background: var(--info-bg);
+      transform: none;
+    }
+
+    .word-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin: 0 0 8px;
+      justify-content: center;
+    }
+
+    .word-control {
+      flex: 0 0 auto;
+      min-height: 30px;
+      padding: 4px 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      background: var(--info-bg);
+      color: var(--text-primary);
+      font-size: 11px;
+    }
+
+    .word-control:hover {
+      border-color: var(--btn-generate);
+      color: var(--btn-generate);
+      transform: none;
     }
     
     .strength-meter {
@@ -142,7 +189,11 @@
     }
     
     .strength-label {
-      display: none;
+      display: inline-block;
+      min-width: 58px;
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 600;
     }
     
     .strength-indicator {
@@ -305,6 +356,23 @@
       color: var(--text-primary);
       margin-bottom: 6px;
       font-weight: 600;
+    }
+
+    .setting-group select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: var(--container-bg);
+      color: var(--text-primary);
+      font-size: 12px;
+    }
+
+    .privacy-note {
+      margin-top: 7px;
+      color: var(--text-secondary);
+      font-size: 11px;
+      line-height: 1.4;
     }
     
     .toggle-options {
@@ -593,6 +661,41 @@
       white-space: nowrap;
       flex-shrink: 0;
     }
+
+    .history-tag-input {
+      width: 110px;
+      min-width: 0;
+      padding: 5px 7px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background: var(--container-bg);
+      color: var(--text-primary);
+      font-size: 11px;
+    }
+
+    .history-tag-input:focus {
+      outline: none;
+      border-color: var(--btn-generate);
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.12);
+    }
+
+    .history-tag-save {
+      background: transparent;
+      border: 1px solid var(--btn-generate);
+      color: var(--btn-generate);
+      padding: 5px 7px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      min-height: auto;
+      white-space: nowrap;
+    }
+
+    .history-tag-save:hover {
+      background: var(--btn-generate);
+      color: white;
+      transform: none;
+    }
     
     .history-pwd {
       font-family: 'Courier New', monospace;
@@ -758,6 +861,10 @@
         font-size: 11px;
         padding: 10px 8px;
       }
+
+      .history-tag-input {
+        width: 82px;
+      }
       
       .history-pwd {
         font-size: 11px;
@@ -826,14 +933,19 @@
     
     <div class="password-display">
       <div id="password">Click Generate</div>
+      <button class="password-visibility" id="visibilityBtn" onclick="togglePasswordVisibility()" title="Show password" aria-label="Show password">👁</button>
     </div>
+
+    <div class="word-controls" id="wordControls" aria-label="Regenerate individual words"></div>
     
     <div class="strength-meter">
       <span class="strength-icon" id="strengthIcon">🔒</span>
+      <span class="strength-label" id="strengthLabel">Not rated</span>
       <div class="strength-bar">
-        <div class="strength-fill" id="strengthFill"></div>
+        <div class="strength-fill" id="strengthFill" role="progressbar" aria-label="Password strength" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
       </div>
     </div>
+    <div class="privacy-note" id="strengthExplanation" aria-live="polite">Generate a password to see its strength.</div>
     
     <div class="app-tag-section">
       <label for="appNameInput">📱 Associated App/Service (optional):</label>
@@ -861,7 +973,7 @@
       </button>
     </div>
     
-    <div class="status" id="status"></div>
+    <div class="status" id="status" role="status" aria-live="polite"></div>
     
     <div class="keyboard-hint">
       Shortcuts: <kbd>Enter</kbd> Generate • <kbd>Ctrl+K</kbd> Copy
@@ -870,11 +982,46 @@
     <div class="settings-panel" id="settingsPanel">
       <div class="setting-group">
         <label>
-          Length: <span class="range-value" id="lengthValue">16</span>
+          Minimum length: <span class="range-value" id="lengthValue">20</span>
         </label>
-        <input type="range" id="lengthSlider" min="8" max="16" value="16" oninput="updateLength()">
+        <input type="range" id="lengthSlider" min="12" max="32" value="20" oninput="updateLength()">
+      </div>
+
+      <div class="setting-group">
+        <label for="compatibilityPreset">Compatibility preset</label>
+        <select id="compatibilityPreset" onchange="applyCompatibilityPreset()">
+          <option value="balanced">Balanced</option>
+          <option value="maximum">Maximum compatibility</option>
+          <option value="lettersNumbers">Letters and numbers only</option>
+          <option value="noAmbiguous">Avoid ambiguous characters</option>
+        </select>
+      </div>
+
+      <div class="setting-group">
+        <div class="toggle-options">
+          <label class="toggle-item">
+            <input type="checkbox" id="saveHistory" onchange="toggleHistoryStorage()">
+            <span>Save history locally</span>
+          </label>
+        </div>
+        <label for="historyExpiry" style="margin-top: 8px;">History expiry</label>
+        <select id="historyExpiry" onchange="saveSettings(); pruneHistory(); renderHistory();">
+          <option value="1">After 1 day</option>
+          <option value="7">After 7 days</option>
+          <option value="30">After 30 days</option>
+          <option value="0">Never expire</option>
+        </select>
+        <div class="privacy-note">Saved history stays only in this browser and contains plaintext passwords.</div>
       </div>
       
+      <div class="setting-group">
+        <label for="generationMode">Password style</label>
+        <select id="generationMode" onchange="saveSettings()">
+          <option value="memorable">Memorable passphrase</option>
+          <option value="random">Random characters</option>
+        </select>
+      </div>
+
       <div class="setting-group">
         <div class="toggle-options">
           <label class="toggle-item">
@@ -885,17 +1032,9 @@
             <input type="checkbox" id="includeNumbers" checked onchange="saveSettings()">
             <span>Numbers</span>
           </label>
-          <label class="toggle-item">
-            <input type="checkbox" id="includeWords" checked onchange="saveSettings()">
-            <span>🧠 Memorable words</span>
-          </label>
-          <label class="toggle-item">
-            <input type="checkbox" id="useOnlineWords" onchange="saveSettings()">
-            <span>🌐 Online</span>
-          </label>
         </div>
         <div style="margin-top: 8px; font-size: 12px; color: var(--text-secondary);">
-          Use word patterns plus digits and symbols for strong, easier-to-remember passwords.
+          Passphrases use complete unrelated words, so they are easier to read and remember.
         </div>
       </div>
     </div>
@@ -950,34 +1089,73 @@
       
       // security
       "token","secret","vault","cipher","hash","salt","keypair","oauth",
-      "kerberos","cert","tls","https","zeroTrust"
+      "kerberos","cert","tls","https","zeroTrust",
+
+      // everyday words for memorable passphrases
+      "apple","apricot","arrow","autumn","bamboo","basket","beacon","blanket",
+      "blossom","book","breeze","bridge","button","candle","canyon","carpet",
+      "castle","cedar","circle","clover","coconut","coral","corner","cottage",
+      "cricket","desert","diamond","dolphin","door","dove","dream","drift",
+      "feather","field","finch","firefly","flute","garden","glacier","globe",
+      "guitar","hammer","honey","island","jacket","jasmine","jungle","kitten",
+      "lantern","lemon","library","lilac","maple","meadow","melon","mirror",
+      "monsoon","morning","mosaic","mountain","muffin","museum","ocean","olive",
+      "orange","otter","pebble","pepper","piano","picnic","pillow","pocket",
+      "pond","prairie","pumpkin","rainbow","raven","ribbon","river","robin",
+      "sailboat","sapphire","school","scooter","shell","silver","sketch","sky",
+      "soda","sparrow","spice","spring","starfish","station","sunset","teapot",
+      "thistle","ticket","toast","toffee","topaz","tulip","valley","velvet",
+      "violet","walnut","waterfall","window","winter","willow","woodland","yacht"
     ];
     
     const SYMBOLS = "!@#$%^&*?";
     const LOWERCASE = "abcdefghijklmnopqrstuvwxyz";
     const UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const NUMBERS = "0123456789";
+    const AMBIGUOUS = "Il1O0o";
+    const COMMON_PASSWORDS = ["password", "qwerty", "letmein", "welcome", "admin", "123456", "dragon", "monkey"];
     
     let settings = {
-      length: 16,
+      length: 20,
       includeSymbols: true,
       includeNumbers: true,
       includeWords: true,
+      mode: 'memorable',
+      saveHistory: false,
+      historyExpiry: 7,
+      excludeAmbiguous: false,
+      compatibilityPreset: 'balanced',
       darkMode: false,
-      useOnlineWords: false
     };
+
+    let currentPassword = '';
+    let currentPassphrase = null;
+    let passwordVisible = true;
     
     function randomWord() {
-      const word = WORDS[Math.floor(Math.random() * WORDS.length)];
+      const word = WORDS[randomIndex(WORDS.length)];
       return word.charAt(0).toUpperCase() + word.slice(1);
     }
     
     function randomChar(charset) {
-      return charset.charAt(Math.floor(Math.random() * charset.length));
+      return charset.charAt(randomIndex(charset.length));
     }
     
     function getRandomInt(min, max) {
-      return Math.floor(Math.random() * (max - min + 1)) + min;
+      return min + randomIndex(max - min + 1);
+    }
+
+    function randomIndex(max) {
+      if (!Number.isInteger(max) || max <= 0) {
+        throw new Error('Random index must have a positive maximum');
+      }
+
+      const limit = Math.floor(0x100000000 / max) * max;
+      const values = new Uint32Array(1);
+      do {
+        crypto.getRandomValues(values);
+      } while (values[0] >= limit);
+      return values[0] % max;
     }
     
     function randomDigitSequence(length = 2) {
@@ -988,15 +1166,25 @@
       return digits;
     }
 
+    function getCharacterSet(characters) {
+      if (!settings.excludeAmbiguous) return characters;
+      return characters.split('').filter(character => !AMBIGUOUS.includes(character)).join('');
+    }
+
     function shuffleString(str) {
-      return str.split('').sort(() => Math.random() - 0.5).join('');
+      const characters = str.split('');
+      for (let index = characters.length - 1; index > 0; index--) {
+        const swapIndex = randomIndex(index + 1);
+        [characters[index], characters[swapIndex]] = [characters[swapIndex], characters[index]];
+      }
+      return characters.join('');
     }
     
     function ensureRequiredTypes(password, targetLength) {
       const required = [];
-      if (!/[a-z]/.test(password)) required.push(randomChar(LOWERCASE));
-      if (!/[A-Z]/.test(password)) required.push(randomChar(UPPERCASE));
-      if (settings.includeNumbers && !/[0-9]/.test(password)) required.push(randomChar(NUMBERS));
+      if (!/[a-z]/.test(password)) required.push(randomChar(getCharacterSet(LOWERCASE)));
+      if (!/[A-Z]/.test(password)) required.push(randomChar(getCharacterSet(UPPERCASE)));
+      if (settings.includeNumbers && !/[0-9]/.test(password)) required.push(randomChar(getCharacterSet(NUMBERS)));
       if (settings.includeSymbols && !/[!@#$%^&*?]/.test(password)) required.push(randomChar(SYMBOLS));
       
       if (required.length === 0) {
@@ -1007,8 +1195,15 @@
       return shuffleString(password + required.join(''));
     }
     
-    function generateMemorablePassword(length) {
-      const wordCount = length <= 12 ? 2 : 3;
+    function buildMemorablePassword() {
+      const separator = settings.includeSymbols ? currentPassphrase.symbol : '';
+      let password = currentPassphrase.words.join(separator);
+      if (settings.includeNumbers) password += currentPassphrase.numberPiece;
+      return password;
+    }
+
+    function generateMemorablePassword(minLength) {
+      const wordCount = minLength >= 24 ? 4 : 3;
       const words = [];
       while (words.length < wordCount) {
         const nextWord = randomWord();
@@ -1019,54 +1214,53 @@
       
       const numberPiece = settings.includeNumbers ? randomDigitSequence(getRandomInt(2, 4)) : '';
       const symbolPiece = settings.includeSymbols ? randomChar(SYMBOLS) : '';
-      const patterns = [];
-      
-      if (settings.includeSymbols && settings.includeNumbers) {
-        patterns.push(`${words[0]}${symbolPiece}${numberPiece}${words[1]}`);
-        patterns.push(`${words[0]}${numberPiece}${symbolPiece}${words[1]}`);
-        patterns.push(`${words[0]}${symbolPiece}${words[1]}${numberPiece}`);
-        if (wordCount === 3) {
-          patterns.push(`${words[0]}${symbolPiece}${words[1]}${numberPiece}${words[2]}`);
-          patterns.push(`${words[0]}${numberPiece}${words[1]}${symbolPiece}${words[2]}`);
-        }
-      } else if (settings.includeSymbols) {
-        patterns.push(`${words[0]}${symbolPiece}${words[1]}`);
-        if (wordCount === 3) {
-          patterns.push(`${words[0]}${symbolPiece}${words[1]}${symbolPiece}${words[2]}`);
-        }
-      } else if (settings.includeNumbers) {
-        patterns.push(`${words[0]}${numberPiece}${words[1]}`);
-        if (wordCount === 3) {
-          patterns.push(`${words[0]}${numberPiece}${words[1]}${numberPiece}${words[2]}`);
-        }
-      } else {
-        patterns.push(`${words[0]}${words[1]}`);
-        if (wordCount === 3) {
-          patterns.push(`${words[0]}${words[1]}${words[2]}`);
+      currentPassphrase = { words, numberPiece, symbol: symbolPiece };
+      let password = buildMemorablePassword();
+
+      while (password.length < minLength) {
+        const nextWord = randomWord();
+        if (!currentPassphrase.words.includes(nextWord)) {
+          words.push(nextWord);
+          password = buildMemorablePassword();
         }
       }
-      
-      let pwd = patterns[Math.floor(Math.random() * patterns.length)];
-      const charset = LOWERCASE + UPPERCASE + (settings.includeNumbers ? NUMBERS : '') + (settings.includeSymbols ? SYMBOLS : '');
-      while (pwd.length < length) {
-        pwd += randomChar(charset);
+      return password;
+    }
+
+    function renderWordControls() {
+      const controls = document.getElementById('wordControls');
+      if (!controls || !currentPassphrase || settings.mode !== 'memorable') {
+        if (controls) controls.innerHTML = '';
+        return;
       }
-      
-      if (pwd.length > length) {
-        pwd = pwd.slice(0, length);
-      }
-      
-      return ensureRequiredTypes(pwd, length);
+
+      controls.innerHTML = currentPassphrase.words.map((word, index) =>
+        `<button class="word-control" onclick="regenerateWord(${index})" title="Regenerate word ${index + 1}">${escapeHtml(word)} ↻</button>`
+      ).join('');
+    }
+
+    function regenerateWord(index) {
+      if (!currentPassphrase || !currentPassphrase.words[index]) return;
+      const previousPassword = currentPassword;
+      let nextWord = randomWord();
+      while (currentPassphrase.words.includes(nextWord)) nextWord = randomWord();
+      currentPassphrase.words[index] = nextWord;
+      currentPassword = buildMemorablePassword();
+      renderPassword();
+      updateStrengthMeter(currentPassword);
+      replaceLatestHistoryPassword(previousPassword, currentPassword);
+      renderWordControls();
+      showStatus('✓ Word regenerated', 'success');
     }
     
     function generatePassword() {
-      const targetLength = Math.max(8, Math.min(24, settings.length || 16));
+      const targetLength = Math.max(12, Math.min(32, settings.length || 20));
       let pwd = '';
       
-      if (settings.includeWords) {
+      if (settings.mode === 'memorable') {
         pwd = generateMemorablePassword(targetLength);
       } else {
-        const charset = LOWERCASE + UPPERCASE + (settings.includeNumbers ? NUMBERS : '') + (settings.includeSymbols ? SYMBOLS : '');
+        const charset = getCharacterSet(LOWERCASE + UPPERCASE) + (settings.includeNumbers ? getCharacterSet(NUMBERS) : '') + (settings.includeSymbols ? SYMBOLS : '');
         for (let i = 0; i < targetLength; i++) {
           pwd += randomChar(charset);
         }
@@ -1078,37 +1272,67 @@
     
     function calculateStrength(password) {
       let strength = 0;
-      
+
       if (password.length >= 12) strength += 25;
-      if (password.length >= 16) strength += 25;
+      if (password.length >= 16) strength += 20;
+      if (password.length >= 20) strength += 15;
       if (/[a-z]/.test(password)) strength += 10;
       if (/[A-Z]/.test(password)) strength += 10;
-      if (/[0-9]/.test(password)) strength += 15;
-      if (/[!@#$%^&*?]/.test(password)) strength += 15;
+      if (/[0-9]/.test(password)) strength += 10;
+      if (/[!@#$%^&*?]/.test(password)) strength += 10;
+
+      const normalized = password.toLowerCase();
+      if (COMMON_PASSWORDS.includes(normalized)) strength -= 35;
+      if (/(.)\1{2,}/.test(password) || /123|abc|qwe/i.test(password)) strength -= 15;
       
-      return Math.min(100, strength);
+      return Math.max(0, Math.min(100, strength));
     }
     
     function updateStrengthMeter(password) {
       const strength = calculateStrength(password);
       const fill = document.getElementById('strengthFill');
       const icon = document.getElementById('strengthIcon');
+      const label = document.getElementById('strengthLabel');
+      const explanation = document.getElementById('strengthExplanation');
       
       fill.className = 'strength-fill';
+      fill.setAttribute('aria-valuenow', strength);
       
       if (strength < 50) {
         fill.classList.add('weak');
         icon.textContent = '🔓';
         icon.title = 'Weak';
+        label.textContent = 'Needs work';
+        explanation.textContent = 'Use a longer password and avoid common words or repeated patterns.';
       } else if (strength < 80) {
         fill.classList.add('medium');
         icon.textContent = '🔐';
         icon.title = 'Medium';
+        label.textContent = 'Good';
+        explanation.textContent = 'Good foundation. More length will improve resistance to guessing.';
       } else {
         fill.classList.add('strong');
         icon.textContent = '🔒';
         icon.title = 'Strong';
+        label.textContent = 'Strong';
+        explanation.textContent = 'Long and varied enough for a strong password.';
       }
+    }
+
+    function renderPassword() {
+      const passwordEl = document.getElementById('password');
+      const visibilityBtn = document.getElementById('visibilityBtn');
+      passwordEl.textContent = passwordVisible ? currentPassword : '•'.repeat(currentPassword.length);
+      passwordEl.classList.toggle('is-hidden', !passwordVisible);
+      visibilityBtn.textContent = passwordVisible ? '🙈' : '👁';
+      visibilityBtn.title = passwordVisible ? 'Hide password' : 'Show password';
+      visibilityBtn.setAttribute('aria-label', visibilityBtn.title);
+    }
+
+    function togglePasswordVisibility() {
+      if (!currentPassword) return;
+      passwordVisible = !passwordVisible;
+      renderPassword();
     }
     
     function generateNewPassword() {
@@ -1117,7 +1341,10 @@
       const password = generatePassword();
       const appName = appNameInput.value.trim();
       
-      passwordEl.textContent = password;
+      currentPassword = password;
+      passwordVisible = true;
+      renderPassword();
+      renderWordControls();
       updateStrengthMeter(password);
       addToHistory(password, appName);
       
@@ -1128,7 +1355,7 @@
     }
     
     function copyToClipboard() {
-      const password = document.getElementById('password').textContent;
+      const password = currentPassword;
       
       if (password && password !== 'Click Generate' && password !== 'Generating...') {
         // Modern Clipboard API with fallback
@@ -1182,14 +1409,20 @@
         const saved = localStorage.getItem('pwdGenSettings');
         if (saved) {
           settings = JSON.parse(saved);
+          settings.length = Math.max(12, Math.min(32, Number(settings.length) || 20));
+          settings.mode = settings.mode || (settings.includeWords === false ? 'random' : 'memorable');
+          settings.saveHistory = settings.saveHistory === true;
+          settings.historyExpiry = [0, 1, 7, 30].includes(Number(settings.historyExpiry)) ? Number(settings.historyExpiry) : 7;
+          settings.excludeAmbiguous = settings.excludeAmbiguous === true;
+          settings.compatibilityPreset = settings.compatibilityPreset || (settings.excludeAmbiguous ? 'noAmbiguous' : 'balanced');
           document.getElementById('lengthSlider').value = settings.length;
           document.getElementById('lengthValue').textContent = settings.length;
+          document.getElementById('generationMode').value = settings.mode;
           document.getElementById('includeSymbols').checked = settings.includeSymbols;
           document.getElementById('includeNumbers').checked = settings.includeNumbers;
-          document.getElementById('includeWords').checked = settings.includeWords;
-          if (document.getElementById('useOnlineWords')) {
-            document.getElementById('useOnlineWords').checked = settings.useOnlineWords || false;
-          }
+          document.getElementById('saveHistory').checked = settings.saveHistory;
+          document.getElementById('historyExpiry').value = String(settings.historyExpiry);
+          document.getElementById('compatibilityPreset').value = settings.compatibilityPreset;
         }
         
         const darkMode = localStorage.getItem('darkMode') === 'true';
@@ -1207,11 +1440,11 @@
       settings.length = parseInt(document.getElementById('lengthSlider').value);
       settings.includeSymbols = document.getElementById('includeSymbols').checked;
       settings.includeNumbers = document.getElementById('includeNumbers').checked;
-      settings.includeWords = document.getElementById('includeWords').checked;
-      
-      if (document.getElementById('useOnlineWords')) {
-        settings.useOnlineWords = document.getElementById('useOnlineWords').checked;
-      }
+      settings.mode = document.getElementById('generationMode').value;
+      settings.includeWords = settings.mode === 'memorable';
+      settings.saveHistory = document.getElementById('saveHistory').checked;
+      settings.historyExpiry = Number(document.getElementById('historyExpiry').value);
+      settings.compatibilityPreset = document.getElementById('compatibilityPreset').value;
       
       try {
         localStorage.setItem('pwdGenSettings', JSON.stringify(settings));
@@ -1219,10 +1452,32 @@
         console.error('Failed to save settings', e);
       }
     }
+
+    function toggleHistoryStorage() {
+      const enabled = document.getElementById('saveHistory').checked;
+      if (!enabled && localStorage.getItem('pwdHistory')) {
+        if (!confirm('Turn off history and delete all saved passwords?')) {
+          document.getElementById('saveHistory').checked = true;
+          return;
+        }
+        localStorage.removeItem('pwdHistory');
+      }
+      saveSettings();
+      renderHistory();
+    }
     
     function updateLength() {
       const length = document.getElementById('lengthSlider').value;
       document.getElementById('lengthValue').textContent = length;
+      saveSettings();
+    }
+
+    function applyCompatibilityPreset() {
+      const preset = document.getElementById('compatibilityPreset').value;
+      settings.compatibilityPreset = preset;
+      settings.excludeAmbiguous = preset === 'noAmbiguous' || preset === 'maximum';
+      document.getElementById('includeSymbols').checked = preset !== 'maximum' && preset !== 'lettersNumbers';
+      document.getElementById('includeNumbers').checked = true;
       saveSettings();
     }
     
@@ -1259,6 +1514,7 @@
     
     function addToHistory(password, appName = '') {
       try {
+        if (!settings.saveHistory) return;
         let history = JSON.parse(localStorage.getItem('pwdHistory') || '[]');
         
         // Migrate old format if needed
@@ -1287,6 +1543,11 @@
       try {
         const history = JSON.parse(localStorage.getItem('pwdHistory') || '[]');
         const historyList = document.getElementById('historyList');
+
+        if (!settings.saveHistory) {
+          historyList.innerHTML = '<div class="no-history">History is off. Enable local history in Settings.</div>';
+          return;
+        }
         
         if (history.length === 0) {
           historyList.innerHTML = '<div class="no-history">No passwords yet</div>';
@@ -1307,6 +1568,8 @@
                 </div>
               </div>
               <div class="history-item-footer">
+                <input class="history-tag-input" id="historyTag-${index}" value="${escapeHtml(appName === 'No tag' ? '' : appName)}" placeholder="Add tag" aria-label="Tag for password ${index + 1}">
+                <button class="history-tag-save" onclick="saveHistoryTag(${index})" aria-label="Save tag">Save</button>
                 <button class="history-copy" onclick="copyFromHistory('${pwd.replace(/'/g, "\\'")}')" aria-label="Copy password">📋</button>
                 <button class="history-delete" onclick="deleteFromHistory(${index})" aria-label="Delete entry">🗑️</button>
               </div>
@@ -1340,6 +1603,40 @@
         console.error('Failed to delete from history', e);
       }
     }
+
+    function saveHistoryTag(index) {
+      try {
+        const history = JSON.parse(localStorage.getItem('pwdHistory') || '[]');
+        const tagInput = document.getElementById(`historyTag-${index}`);
+        if (!history[index] || !tagInput) return;
+
+        if (typeof history[index] === 'string') {
+          history[index] = { password: history[index], appName: 'Imported' };
+        }
+        history[index].appName = tagInput.value.trim() || 'No tag';
+        localStorage.setItem('pwdHistory', JSON.stringify(history));
+        renderHistory();
+        showStatus('✓ Tag saved', 'success');
+      } catch(e) {
+        console.error('Failed to save history tag', e);
+        showStatus('⚠ Failed to save tag', 'error');
+      }
+    }
+
+    function replaceLatestHistoryPassword(previousPassword, nextPassword) {
+      if (!settings.saveHistory) return;
+      try {
+        const history = JSON.parse(localStorage.getItem('pwdHistory') || '[]');
+        if (history[0] && history[0].password === previousPassword) {
+          history[0].password = nextPassword;
+          history[0].timestamp = new Date().toISOString();
+          localStorage.setItem('pwdHistory', JSON.stringify(history));
+          renderHistory();
+        }
+      } catch(e) {
+        console.error('Failed to update regenerated password', e);
+      }
+    }
     
     function copyFromHistory(password) {
       if (navigator.clipboard && window.isSecureContext) {
@@ -1362,15 +1659,36 @@
         showStatus('✓ History cleared', 'success');
       }
     }
+
+    function pruneHistory() {
+      if (!settings.saveHistory || !settings.historyExpiry) return;
+      try {
+        const cutoff = Date.now() - settings.historyExpiry * 24 * 60 * 60 * 1000;
+        const history = JSON.parse(localStorage.getItem('pwdHistory') || '[]');
+        const retained = history.filter(item => {
+          if (typeof item === 'string' || !item.timestamp) return true;
+          return new Date(item.timestamp).getTime() >= cutoff;
+        });
+        localStorage.setItem('pwdHistory', JSON.stringify(retained));
+      } catch(e) {
+        console.error('Failed to prune history', e);
+      }
+    }
     
     function exportPasswords() {
       try {
+        if (!settings.saveHistory) {
+          showStatus('⚠ Enable history before exporting', 'error');
+          return;
+        }
         const history = JSON.parse(localStorage.getItem('pwdHistory') || '[]');
         
         if (history.length === 0) {
           showStatus('⚠ No passwords to export', 'error');
           return;
         }
+
+        if (!confirm('Export plaintext passwords to a file? Keep the file secure and delete it when finished.')) return;
         
         let content = 'Passkee - Password History\n' + 
                       '==========================\n\n';
@@ -1404,7 +1722,9 @@
     // Keyboard shortcuts
     function setupKeyboardShortcuts() {
       document.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
+        const activeElement = document.activeElement;
+        const isTextField = activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeElement.tagName);
+        if (e.key === 'Enter' && !isTextField && !e.shiftKey && !e.ctrlKey && !e.altKey) {
           e.preventDefault();
           generateNewPassword();
         }
@@ -1420,6 +1740,7 @@
     window.onload = function() {
       loadSettings();
       migrateOldHistory();
+      pruneHistory();
       renderHistory();
       setupKeyboardShortcuts();
       //generateNewPassword();

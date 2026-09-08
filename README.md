@@ -5,23 +5,25 @@ A powerful, feature-rich password generator with word-based patterns. Fully resp
 ## ✨ Features
 
 ### Core Features
-- ✅ Generates customizable passwords (8-16 characters)
-- ✅ **800+ curated words** across 4 comprehensive themes
-  - **DevOps** (200+ words): CI/CD, containers, cloud, IaC, monitoring, networking
-  - **Nature** (200+ words): Landscapes, weather, flora, fauna, celestial, elements
-  - **Tech** (200+ words): Computing, AI, protocols, blockchain, sci-fi concepts
-  - **Security** (200+ words): Authentication, encryption, network security, protocols
-- ✅ **Optional online word API** for unlimited variety
-- ✅ Word-based memorable patterns
-- ✅ Password strength indicator with visual meter
+- ✅ Generates passwords with a 12-32 character minimum-length setting
+- ✅ Memorable passphrases made from complete, unrelated words
+- ✅ Random-character mode for password managers
+- ✅ Password strength indicator with pattern-aware feedback
+- ✅ Individual word regeneration for passphrases
 - ✅ Real-time strength analysis
 
 ### Advanced Features
 - 🎨 **Dark Mode** - Toggle between light and dark themes
 - ⚙️ **Customization Options**
-  - Adjustable password length (8-32 chars)
-  - Toggle character types (symbols, numbers, words)
-  - Select word theme (DevOps, Nature, Tech, Security, All)
+  - Adjustable minimum length (12-32 chars)
+  - Memorable passphrase or random-character mode
+  - Toggle numbers and symbols
+  - Compatibility presets for restrictive services
+- 👁️ **Password Privacy Controls**
+  - Show or hide the generated password on screen
+  - Password history is off by default
+  - Optional local history expiry after 1, 7, or 30 days
+  - Explicit confirmation before plaintext export
 - ⌨️ **Keyboard Shortcuts**
   - `Enter` - Generate new password
   - `Ctrl+K` - Copy to clipboard
@@ -29,6 +31,7 @@ A powerful, feature-rich password generator with word-based patterns. Fully resp
   - Stores last 10 passwords locally in your browser
   - Private to your device (not shared with anyone)
   - Quick copy from history
+  - Add or edit an app/service tag after generation
   - Clear all option
 - 📥 **Export Functionality**
   - Download password history as text file
@@ -36,7 +39,7 @@ A powerful, feature-rich password generator with word-based patterns. Fully resp
 
 ### Security & Privacy
 - 🔒 100% client-side generation (no server required)
-- 🛡️ Secure random number generation
+- 🛡️ Secure random number generation using the Web Crypto API
 - 🔐 No data collection or tracking
 - 💾 Local storage only (localStorage in your browser)
 - 🚫 No passwords sent over the network
@@ -59,26 +62,24 @@ A powerful, feature-rich password generator with word-based patterns. Fully resp
 
 ### Customization
 1. Click **Customize Settings** to expand options
-2. Adjust password length with the slider (8-32 characters)
-3. Toggle character types (symbols, numbers, word-based)
-4. Select your preferred word theme (DevOps, Nature, Tech, Security, All)
-5. **Optional**: Enable "Use online word API" for additional variety
-   - Fetches 200 words and intelligently filters for memorable ones
-   - Excludes mundane words (like "table", "chair")
-   - Keeps only cool-sounding, easy-to-remember words
-   - Automatically falls back to local 800+ word library if offline or insufficient quality words
-   - No authentication required
-6. Settings are saved automatically in your browser
+2. Adjust the minimum length with the slider (12-32 characters)
+3. Choose memorable passphrases or random characters
+4. Toggle numbers and symbols when supported by the service
+5. Choose a compatibility preset when a service rejects certain characters
+6. Regenerate individual words with the `↻` controls below a passphrase
+7. Settings are saved automatically in your browser
 
 ### Dark Mode
 - Click the 🌙/☀️ icon in the top-right corner
 - Your preference is remembered
 
 ### Password History
-- Last 10 generated passwords are saved locally
+- History is disabled by default; enable it in Settings only when needed
+- When enabled, the last 10 generated passwords are saved locally
 - Click **Copy** on any history item to copy it
+- Add or edit an app/service tag after generation
 - Click **Clear All** to remove history
-- History is private to your browser/device
+- History is private to your browser/device and can expire automatically
 
 ### Export
 - Click **Export Passwords** to download your history as a text file
@@ -148,17 +149,18 @@ PasswordGenApp/
 
 ### Storage
 - **Settings**: Stored in `localStorage` as `pwdGenSettings`
-- **History**: Stored in `localStorage` as `pwdHistory` (max 10 items)
+- **History**: Stored in `localStorage` as `pwdHistory` (max 10 items, opt-in)
 - **Dark Mode**: Stored in `localStorage` as `darkMode`
 - All data is private to your browser and never leaves your device
 
 ## Security Features
 
 - ✅ Client-side generation only (no server communication)
-- ✅ Secure random number generation using `Math.random()`
+- ✅ Secure random number generation using the Web Crypto API
 - ✅ No data collection, analytics, or tracking
 - ✅ No cookies used
 - ✅ localStorage is domain-specific and private
+- ✅ History storage is opt-in and supports automatic expiry
 - ✅ HTTPS enforced when deployed
 - ✅ Security headers configured in netlify.toml
 
@@ -191,37 +193,17 @@ A: For security and privacy, all data is stored locally in your browser only.
 **Q: How do I clear my history?**  
 A: Click the "Clear All" button in the Password History section, or clear your browser's localStorage.
 
-**Q: Are the passwords truly random?**  
-A: Yes, passwords use JavaScript's `Math.random()` for randomization. For highly sensitive accounts, consider using a dedicated password manager.
+**Q: Is history enabled by default?**
+A: No. Enable "Save history locally" in Settings only if you need the convenience. Saved passwords remain plaintext in this browser's local storage.
 
-**Q: What themes are available?**  
-A: Four comprehensive themes with 800+ total words:
-- **DevOps** (200+ words): CI/CD tools, containers, cloud platforms, IaC, monitoring
-- **Nature** (200+ words): Landscapes, weather, flora, fauna, celestial bodies
-- **Tech** (200+ words): Computing, AI, protocols, blockchain, sci-fi concepts  
-- **Security** (200+ words): Authentication, encryption, network security
-- **All**: Combines all themes for maximum variety
-
-**Q: What is the online word API feature?**  
-A: An optional feature that fetches random words from the internet for additional variety. It uses intelligent filtering to:
-- Exclude mundane words (table, chair, door, etc.)
-- Filter out hard-to-remember words (too many vowels, simple patterns)
-- Keep only memorable, cool-sounding words (4-12 characters)
-- Falls back to your local 800+ word library if offline or if not enough quality words are found
-
-The API is free, requires no authentication, and results are cached in memory.
-
-**Q: Will enabling online words slow down generation?**  
-A: No! Words are pre-fetched in the background when you enable the feature, so password generation remains instant.
-
-**Q: Can I use this offline?**  
-A: Yes! Once loaded, the app works completely offline with the built-in 800+ word library. The online API is optional and only for additional variety.
+**Q: Are the passwords truly random?**
+A: Yes, passwords use the browser's Web Crypto API for randomization. For highly sensitive accounts, consider using a dedicated password manager.
 
 **Q: Can I adjust the password length?**  
-A: Yes! Use the slider in Customize Settings to select anywhere from 8 to 32 characters.
+A: Yes! Use the slider in Customize Settings to select a minimum length from 12 to 32 characters. Memorable mode adds complete words until that minimum is reached.
 
 **Q: How many unique passwords can this generate?**  
-A: With 800+ words across 4 themes, plus numbers and symbols, the app can generate trillions of unique password combinations. Enabling the online API increases this to virtually unlimited possibilities.
+A: The available combinations depend on the selected mode, length, word list, numbers, and symbols. For important accounts, use a password manager and avoid reusing passwords.
 
 ## License
 

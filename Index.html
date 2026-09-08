@@ -482,7 +482,6 @@
       flex: 0 0 auto;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
     }
     
     .clear-history:hover {
@@ -637,16 +636,15 @@
       align-items: center;
       gap: 8px;
       min-width: 0;
+      flex: 1;
     }
 
     .history-pwd {
       font-family: 'Courier New', monospace;
       font-size: 12px;
       color: var(--text-primary);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      min-width: 0;
+      white-space: normal;
+      overflow-wrap: anywhere;
       flex: 1;
     }
     
@@ -960,16 +958,16 @@
     
     <div class="all-buttons">
       <button id="generateBtn" onclick="generateNewPassword()" title="Generate Password (Enter)" aria-label="Generate password">
-        🔄<span class="btn-text">Gen</span>
+        🔄
       </button>
       <button id="copyBtn" onclick="copyToClipboard()" title="Copy to Clipboard (Ctrl+K)" aria-label="Copy to clipboard">
-        📋<span class="btn-text">Copy</span>
+        📋
       </button>
       <button class="settings-toggle" onclick="toggleSettings()" title="Customize Settings" aria-label="Open settings">
-        ⚙️<span class="btn-text">Set</span>
+        ⚙️
       </button>
       <button class="export-btn" onclick="exportPasswords()" title="Export Password History" aria-label="Export passwords">
-        💾<span class="btn-text">Exp</span>
+        💾
       </button>
     </div>
     
@@ -982,9 +980,9 @@
     <div class="settings-panel" id="settingsPanel">
       <div class="setting-group">
         <label>
-          Minimum length: <span class="range-value" id="lengthValue">20</span>
+          Minimum length: <span class="range-value" id="lengthValue">16</span>
         </label>
-        <input type="range" id="lengthSlider" min="12" max="32" value="20" oninput="updateLength()">
+        <input type="range" id="lengthSlider" min="12" max="16" value="16" oninput="updateLength()">
       </div>
 
       <div class="setting-group">
@@ -1042,7 +1040,7 @@
     <div class="history-panel">
       <div class="history-header">
         <h3>📜 History</h3>
-        <button class="clear-history" onclick="clearHistory()">🗑️ Clear</button>
+        <button class="clear-history" onclick="clearHistory()" title="Clear history" aria-label="Clear history">🗑️</button>
       </div>
       <div class="history-list" id="historyList">
         <div class="no-history">No passwords yet</div>
@@ -1116,12 +1114,12 @@
     const COMMON_PASSWORDS = ["password", "qwerty", "letmein", "welcome", "admin", "123456", "dragon", "monkey"];
     
     let settings = {
-      length: 20,
+      length: 16,
       includeSymbols: true,
       includeNumbers: true,
       includeWords: true,
       mode: 'memorable',
-      saveHistory: false,
+      saveHistory: true,
       historyExpiry: 7,
       excludeAmbiguous: false,
       compatibilityPreset: 'balanced',
@@ -1254,7 +1252,7 @@
     }
     
     function generatePassword() {
-      const targetLength = Math.max(12, Math.min(32, settings.length || 20));
+      const targetLength = Math.max(12, Math.min(16, settings.length || 16));
       let pwd = '';
       
       if (settings.mode === 'memorable') {
@@ -1409,7 +1407,7 @@
         const saved = localStorage.getItem('pwdGenSettings');
         if (saved) {
           settings = JSON.parse(saved);
-          settings.length = Math.max(12, Math.min(32, Number(settings.length) || 20));
+          settings.length = Math.max(12, Math.min(16, Number(settings.length) || 16));
           settings.mode = settings.mode || (settings.includeWords === false ? 'random' : 'memorable');
           settings.saveHistory = settings.saveHistory === true;
           settings.historyExpiry = [0, 1, 7, 30].includes(Number(settings.historyExpiry)) ? Number(settings.historyExpiry) : 7;
@@ -1569,7 +1567,7 @@
               </div>
               <div class="history-item-footer">
                 <input class="history-tag-input" id="historyTag-${index}" value="${escapeHtml(appName === 'No tag' ? '' : appName)}" placeholder="Add tag" aria-label="Tag for password ${index + 1}">
-                <button class="history-tag-save" onclick="saveHistoryTag(${index})" aria-label="Save tag">Save</button>
+                <button class="history-tag-save" onclick="saveHistoryTag(${index})" aria-label="Save tag" title="Save tag">💾</button>
                 <button class="history-copy" onclick="copyFromHistory('${pwd.replace(/'/g, "\\'")}')" aria-label="Copy password">📋</button>
                 <button class="history-delete" onclick="deleteFromHistory(${index})" aria-label="Delete entry">🗑️</button>
               </div>

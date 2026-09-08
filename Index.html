@@ -1197,7 +1197,7 @@
       const separator = settings.includeSymbols ? currentPassphrase.symbol : '';
       let password = currentPassphrase.words.join(separator);
       if (settings.includeNumbers) password += currentPassphrase.numberPiece;
-      return password;
+      return password.slice(0, 16);
     }
 
     function generateMemorablePassword(minLength) {

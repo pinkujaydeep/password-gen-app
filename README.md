@@ -1,210 +1,104 @@
-# � Passkee - Password Generator
+# Passkee
 
-A powerful, feature-rich password generator with word-based patterns. Fully responsive, works on all modern browsers, and includes advanced customization options.
+A mobile-first, on-device password generator. No build step, account, analytics,
+remote generation, or runtime CDN requests.
 
-## ✨ Features
+## Open
 
-### Core Features
-- ✅ Generates passwords with a 12-32 character minimum-length setting
-- ✅ Memorable passphrases made from complete, unrelated words
-- ✅ Random-character mode for password managers
-- ✅ Password strength indicator with pattern-aware feedback
-- ✅ Individual word regeneration for passphrases
-- ✅ Real-time strength analysis
+Open [index.html](index.html) directly in a modern browser. All scripts, icons,
+styles, and words are bundled locally. Clipboard permissions vary on file URLs;
+when copying is denied, the app offers manual selection instead of claiming
+success. Use HTTPS when hosting the app.
 
-### Advanced Features
-- 🎨 **Dark Mode** - Toggle between light and dark themes
-- ⚙️ **Customization Options**
-  - Adjustable minimum length (12-32 chars)
-  - Memorable passphrase or random-character mode
-  - Toggle numbers and symbols
-  - Compatibility presets for restrictive services
-- 👁️ **Password Privacy Controls**
-  - Show or hide the generated password on screen
-  - Password history is off by default
-  - Optional local history expiry after 1, 7, or 30 days
-  - Explicit confirmation before plaintext export
-- ⌨️ **Keyboard Shortcuts**
-  - `Enter` - Generate new password
-  - `Ctrl+K` - Copy to clipboard
-- 📜 **Password History**
-  - Stores last 10 passwords locally in your browser
-  - Private to your device (not shared with anyone)
-  - Quick copy from history
-  - Add or edit an app/service tag after generation
-  - Clear all option
-- 📥 **Export Functionality**
-  - Download password history as text file
-  - Timestamped export
+For deployment, publish this directory on Netlify with no build command.
+[netlify.toml](netlify.toml) configures security headers and the legacy uppercase
+entry-point redirect. Verify the actual response headers after deployment.
 
-### Security & Privacy
-- 🔒 100% client-side generation (no server required)
-- 🛡️ Secure random number generation using the Web Crypto API
-- 🔐 No data collection or tracking
-- 💾 Local storage only (localStorage in your browser)
-- 🚫 No passwords sent over the network
+## Password Modes
 
-## Browser Compatibility
+| Setting | Memorable | Random |
+| --- | --- | --- |
+| Default | 16 characters, shuffled whole words + symbol + number | 16 characters |
+| Range | 8-16 exact characters | 8-16 exact characters |
+| Alphabet | Length-filtered words from the EFF list, symbols, and digits | Uppercase and lowercase, optional digits/symbols |
+| Options | Shared length slider; pieces shuffled on every generation | Shared length slider; numbers; symbols; exclude look-alikes |
 
-- ✅ Chrome/Edge (latest)
-- ✅ Firefox (latest)
-- ✅ Safari (latest)
-- ✅ Mobile browsers (iOS Safari, Chrome Mobile, Samsung Internet)
-- ✅ Supports both light and dark mode
-- ✅ Fully responsive design
+Changing preferences generates a new password. Use Generate new for another
+candidate, Copy password to copy it, and the eye control to hide or reveal it.
+Hidden state is preserved when generating. Switching away masks the password;
+page exit clears the app's current reference and displayed value.
 
-## How to Use
+The selected length is preserved when switching modes. Reset restores 16.
+Memorable mode uses two complete title-cased words, one symbol, and 1-3 digits,
+shuffled as intact pieces with no spaces. Word length adapts from 3 to 6 letters
+to fit the selected length without truncation. For example, `Canvas?Rocket374`
+is 16 characters; `Sun!Map7` is 8. These are examples, not passwords to reuse.
 
-### Basic Usage
-1. Click **Generate** button or press `Enter` to create a password
-2. Click **Copy** button or press `Ctrl+K` to copy to clipboard
-3. Password strength is shown automatically
+**Compact word patterns have limited strength**, even at 16 characters, and are
+not equivalent to 16 random characters. The estimate counts the filtered word
+choices, symbol, and digits conservatively; it does not credit the shuffled order
+or predictable capitalization. Repeated words and leading zeroes can occur.
+For sensitive accounts choose Random, keep 16 characters, and enable MFA.
 
-### Customization
-1. Click **Customize Settings** to expand options
-2. Adjust the minimum length with the slider (12-32 characters)
-3. Choose memorable passphrases or random characters
-4. Toggle numbers and symbols when supported by the service
-5. Choose a compatibility preset when a service rejects certain characters
-6. Regenerate individual words with the `↻` controls below a passphrase
-7. Settings are saved automatically in your browser
+Random mode samples uniformly subject to required character classes; its
+estimate accounts for those constraints. Eight-character passwords are allowed
+for compatibility, not recommended as strong defaults. No score guarantees
+crack time or account security. Look-alike filtering applies only to Random.
+The long-passphrase library routine remains regression-tested but is not exposed
+as an app mode and does not change the app's 8-16 character bounds.
 
-### Dark Mode
-- Click the 🌙/☀️ icon in the top-right corner
-- Your preference is remembered
+## Privacy Boundaries
 
-### Password History
-- History is disabled by default; enable it in Settings only when needed
-- When enabled, the last 10 generated passwords are saved locally
-- Click **Copy** on any history item to copy it
-- Add or edit an app/service tag after generation
-- Click **Clear All** to remove history
-- History is private to your browser/device and can expire automatically
+- New passwords and preferences are not persisted to localStorage or cookies.
+- Password history and plaintext export from the previous version are removed.
+- Existing `pwdHistory` data is detected without rendering it. Delete it using
+  the confirmed Delete old history action on the same origin/browser profile.
+  It is never deleted automatically; changing origins does not migrate it.
+- Clipboard history, cross-device clipboard sync, browser extensions, screenshots,
+  OS memory, and existing downloads are outside this app's protection.
+- JavaScript cannot guarantee secure memory erasure. Hiding text is not encryption.
+- No service worker or automatic offline cache is installed. Downloaded files work
+  locally, but visiting the hosted app once does not guarantee offline availability.
+- A manifest is included, but cross-browser PWA installability is not promised.
 
-### Export
-- Click **Export Passwords** to download your history as a text file
-- File is timestamped and contains all saved passwords
-- **Important:** Keep export files secure and delete after use
+Use a unique password per account, save it in a trusted password manager, and
+enable a passkey or multi-factor authentication when supported.
 
-## Deploy to Netlify
+## Tests
 
-### Method 1: Drag and Drop (Easiest)
+Requires a modern Node.js runtime with Web Crypto (Node 22 or newer recommended):
 
-1. Go to [Netlify Drop](https://app.netlify.com/drop)
-2. Drag the entire project folder onto the page
-3. Your site will be deployed instantly!
-
-### Method 2: Netlify CLI
-
-1. Install Netlify CLI:
-   ```bash
-   npm install -g netlify-cli
-   ```
-
-2. Login to Netlify:
-   ```bash
-   netlify login
-   ```
-
-3. Deploy your site:
-   ```bash
-   netlify deploy --prod
-   ```
-
-4. Follow the prompts and select this directory
-
-### Method 3: Git-based Deployment
-
-1. Push your code to GitHub/GitLab/Bitbucket
-2. Go to [Netlify](https://app.netlify.com)
-3. Click "New site from Git"
-4. Connect your repository
-5. Set build settings:
-   - Build command: (leave empty)
-   - Publish directory: `.`
-6. Click "Deploy site"
-
-## Local Development
-
-Simply open `Index.html` in your browser. No build process required!
-
-## Project Structure
-
-```
-PasswordGenApp/
-├── Index.html          # Main application file (includes all CSS & JS)
-├── netlify.toml        # Netlify configuration
-├── .gitignore          # Git ignore rules
-└── README.md           # This file
+```sh
+node --test generator.test.cjs
 ```
 
-## Technical Details
+The eight tests cover every supported length (8-16), whole-word preservation,
+shuffled pieces, required random-character classes, look-alike filtering, invalid
+bounds, rejected biased random values, missing secure randomness, and dictionary
+validation. The retained long-passphrase routine also has regression coverage.
 
-### Technologies Used
-- Pure HTML5, CSS3, and JavaScript (no dependencies)
-- CSS Variables for theming
-- localStorage API for persistent settings
-- Modern Clipboard API with fallback
-- Responsive CSS with multiple breakpoints
+Browser checks performed during this update covered 320, 375, 390, 768, and 1440px
+layouts and the main controls, denied-clipboard fallback, and background masking.
+These are focused Chromium checks, not a full Safari/Firefox or accessibility
+certification. No Netlify deployment was performed.
 
-### Storage
-- **Settings**: Stored in `localStorage` as `pwdGenSettings`
-- **History**: Stored in `localStorage` as `pwdHistory` (max 10 items, opt-in)
-- **Dark Mode**: Stored in `localStorage` as `darkMode`
-- All data is private to your browser and never leaves your device
+## Structure
 
-## Security Features
+- [index.html](index.html): semantic interface and fallback CSP.
+- [styles.css](styles.css): mobile-first styles and reduced-motion handling.
+- [generator.js](generator.js): Web Crypto sampling and entropy calculations.
+- [app.js](app.js): UI, clipboard feedback, privacy controls, and legacy cleanup.
+- [wordlist.js](wordlist.js): browser wrapper for the official EFF list.
+- [eff_large_wordlist.txt](eff_large_wordlist.txt): original EFF list.
+- [lucide.min.js](lucide.min.js): pinned, locally served Lucide 0.468.0 icons.
+- [generator.test.cjs](generator.test.cjs): focused Node tests.
+- [AUDIT.md](AUDIT.md): original findings, remediations, limitations, and credits.
 
-- ✅ Client-side generation only (no server communication)
-- ✅ Secure random number generation using the Web Crypto API
-- ✅ No data collection, analytics, or tracking
-- ✅ No cookies used
-- ✅ localStorage is domain-specific and private
-- ✅ History storage is opt-in and supports automatic expiry
-- ✅ HTTPS enforced when deployed
-- ✅ Security headers configured in netlify.toml
+## Credits
 
-### Privacy Notice
-**Your password history is stored ONLY in your browser's localStorage**. This means:
-- ✅ Passwords never leave your device
-- ✅ Not shared between browsers or devices
-- ✅ Not visible to other users
-- ✅ Cleared when you clear browser data
-- ✅ No server storage or transmission
+EFF Large Wordlist by Electronic Frontier Foundation, available at
+https://www.eff.org/dice under CC BY 3.0 US:
+https://creativecommons.org/licenses/by/3.0/us/ . Entries are unchanged.
 
-## Keyboard Shortcuts
-
-| Shortcut | Action |
-|----------|--------|
-| `Enter` | Generate new password |
-| `Ctrl+K` (or `Cmd+K` on Mac) | Copy password to clipboard |
-
-## FAQ
-
-**Q: Is my password history shared with others?**  
-A: No! History is stored only in your browser's localStorage and never leaves your device.
-
-**Q: Can I use this offline?**  
-A: Yes! Once loaded, the app works completely offline.
-
-**Q: Why doesn't my history sync across devices?**  
-A: For security and privacy, all data is stored locally in your browser only.
-
-**Q: How do I clear my history?**  
-A: Click the "Clear All" button in the Password History section, or clear your browser's localStorage.
-
-**Q: Is history enabled by default?**
-A: No. Enable "Save history locally" in Settings only if you need the convenience. Saved passwords remain plaintext in this browser's local storage.
-
-**Q: Are the passwords truly random?**
-A: Yes, passwords use the browser's Web Crypto API for randomization. For highly sensitive accounts, consider using a dedicated password manager.
-
-**Q: Can I adjust the password length?**  
-A: Yes! Use the slider in Customize Settings to select a minimum length from 12 to 32 characters. Memorable mode adds complete words until that minimum is reached.
-
-**Q: How many unique passwords can this generate?**  
-A: The available combinations depend on the selected mode, length, word list, numbers, and symbols. For important accounts, use a password manager and avoid reusing passwords.
-
-## License
-
-Free to use and modify.
+Lucide icons 0.468.0: https://lucide.dev, ISC license; the bundled file retains
+its license notice. Third-party updates should be pinned, reviewed, and tested.

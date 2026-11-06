@@ -1,34 +1,30 @@
-# Netlify configuration file
-
 [build]
-  # Publish directory (root since it's a simple HTML app)
   publish = "."
-  
-  # No build command needed for static HTML
   command = ""
 
 [[headers]]
-  # Apply these headers to all routes
   for = "/*"
   [headers.values]
-    # Security headers
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
-    X-XSS-Protection = "1; mode=block"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    
-    # Cache control
-    Cache-Control = "public, max-age=3600, must-revalidate"
+    Referrer-Policy = "no-referrer"
+    Strict-Transport-Security = "max-age=31536000"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(), usb=(), clipboard-read=()"
+    Cache-Control = "no-cache"
 
 [[headers]]
-  # Cache control for HTML
+  for = "/"
+  [headers.values]
+    Cache-Control = "no-store"
+
+[[headers]]
   for = "/*.html"
   [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
+    Cache-Control = "no-store"
 
-# Redirect rules
 [[redirects]]
-  from = "/*"
-  to = "/Index.html"
-  status = 200
-  force = false
+  from = "/Index.html"
+  to = "/"
+  status = 301
+  force = true

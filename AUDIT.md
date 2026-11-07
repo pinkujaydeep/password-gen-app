@@ -31,27 +31,31 @@ The six-word remediation described historically below is no longer an app mode.
 3. **History was opt-out on a fresh install.** `settings.saveHistory` was `true`,
    contradicting the README. Plaintext passwords and account tags were written
    to localStorage, where same-origin scripts and anyone with access to the
-   browser profile could read them. Fixed: no new password history or export.
-   Existing history is detected without rendering it; confirmed deletion is
-   available. Old backups, downloads, clipboard history, and other origins are
-   outside this app's control.
+   browser profile could read them. The original remediation removed automatic
+   history and export. The current app adds an explicit Save locally action:
+   saved entries are still plaintext in localStorage, with an in-app warning,
+   default masking, per-entry deletion, and clear-all. Anyone with profile or
+   same-origin script access can read them. Existing legacy history is detected
+   without rendering it; confirmed deletion is available. Backups, clipboard
+   history, and other origins are outside this app's control.
 
 4. **Stored passwords reached an unsafe HTML/JavaScript sink.** History used
    `innerHTML` and interpolated passwords into a double-quoted inline `onclick`
    attribute, escaping only single quotes at that location. Malformed/tampered
    stored data could break attribute context. This is a stored DOM-injection
    risk, not evidence of an unauthenticated remote exploit. Fixed: remove that
-   rendering path and all inline event handlers; use textContent and listeners.
+   rendering path and all inline event handlers; the current saved list uses
+   textContent and event listeners.
 
 ## Medium Priority
 
 5. **Small, uneven word distribution.** A few hundred entries included duplicate
    words and specialist terminology. Duplicate entries made some words more
    likely, and selecting three words was insufficient to support strong claims.
-   Fixed: the unmodified 7,776-entry EFF Large Wordlist, sampled independently
-  with replacement. The compact mode filters entries by length; its smaller
-  selection space is reflected in the estimate and warning. Repeated words
-  are valid random outcomes, not a reason to edit the result into a familiar quote.
+    Fixed: the unmodified 7,776-entry EFF Large Wordlist, sampled independently
+    with replacement. The compact mode filters entries by length; its smaller
+    selection space is reflected in the estimate and warning. Repeated words
+    are valid random outcomes, not a reason to edit the result into a familiar quote.
 
 6. **Random-character construction was not uniformly constrained.** The old
    implementation patched missing character types and shuffled the result.
@@ -62,14 +66,15 @@ The six-word remediation described historically below is no longer an app mode.
 7. **Privacy hiding was incomplete.** Per-word buttons and visible history could
    reveal a supposedly hidden password. Generating also always revealed it.
    Fixed: remove duplicate secret displays, preserve hidden state across
-   generation, mask when the page becomes hidden, clear the rendered password
-   and current reference on page exit, and regenerate on back-forward restoration.
-   JavaScript cannot promise secure memory erasure.
+   generation, mask current and saved entries when the page becomes hidden,
+   clear the current reference on page exit, and regenerate on back-forward
+   restoration. JavaScript cannot promise secure memory erasure.
 
-8. **Expiry did not reliably remove legacy entries.** Entries lacking timestamps
-   were retained indefinitely. Expiry was only opportunistic, not a deletion
-   timer or a guarantee. Fixed: remove ongoing password persistence. Existing
-   legacy history remains until explicitly deleted.
+8. **Legacy history did not reliably expire.** Entries lacking timestamps were
+   retained indefinitely, and opportunistic expiry was not a deletion guarantee.
+   Legacy history remains until explicitly deleted. Current opt-in saved
+   passwords intentionally persist until individually deleted, cleared with
+   the app's Clear all action, or removed by clearing site data.
 
 9. **Clipboard success could be falsely reported.** `execCommand('copy')` can
    return false without throwing, but the fallback announced success anyway.
@@ -79,9 +84,11 @@ The six-word remediation described historically below is no longer an app mode.
 
 10. **Storage and settings failures were inconsistent.** Some storage operations
     were unguarded, and partial/corrupt saved objects could leave invalid values.
-    Fixed: generation has no storage dependency; legacy access is guarded and
-    generator numeric ranges, separators, and dictionary structure are validated.
-    Crypto failures disable copying rather than offering weak randomness.
+    Fixed: generation has no storage dependency; saved data is parsed and
+    validated before display, legacy access is guarded, and storage failures are
+    reported without overwriting unreadable entries. Generator numeric ranges,
+    separators, and dictionary structure are validated. Crypto failures disable
+    copying rather than offering weak randomness.
 
 11. **Deployment lacked a Content Security Policy.** Inline script/handlers
     complicated a strict policy. HSTS and Permissions-Policy were absent;

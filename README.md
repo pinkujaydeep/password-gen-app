@@ -23,10 +23,19 @@ entry-point redirect. Verify the actual response headers after deployment.
 | Alphabet | Length-filtered words from the EFF list, symbols, and digits | Uppercase and lowercase, optional digits/symbols |
 | Options | Shared length slider; pieces shuffled on every generation | Shared length slider; numbers; symbols; exclude look-alikes |
 
-Changing preferences generates a new password. Use Generate new for another
+Passphrase mode is also available: choose 5-10 words, a space, slash, or period
+separator, capitalization, and optional two-digit and symbol suffixes. Its
+entropy estimate reflects word choices only and does not count the optional
+suffix. Passphrases are generated on demand and are not saved automatically.
+
+Changing preferences generates a new result. Use Generate new for another
 candidate, Copy password to copy it, and the eye control to hide or reveal it.
 Hidden state is preserved when generating. Switching away masks the password;
 page exit clears the app's current reference and displayed value.
+Enter an optional label and use Save locally to keep a password in this browser.
+Saved entries are masked by default, can be copied or deleted individually, and
+can all be removed with Clear all. Revealed entries are masked again when the
+page moves to the background.
 
 The selected length is preserved when switching modes. Reset restores 16.
 Memorable mode uses two complete title-cased words, one symbol, and 1-3 digits,
@@ -44,13 +53,21 @@ Random mode samples uniformly subject to required character classes; its
 estimate accounts for those constraints. Eight-character passwords are allowed
 for compatibility, not recommended as strong defaults. No score guarantees
 crack time or account security. Look-alike filtering applies only to Random.
-The long-passphrase library routine remains regression-tested but is not exposed
-as an app mode and does not change the app's 8-16 character bounds.
+The memorable and random modes retain their 8-16 character bounds. Passphrase
+mode uses the existing word-based generator with its separate 5-10 word range.
 
 ## Privacy Boundaries
 
-- New passwords and preferences are not persisted to localStorage or cookies.
-- Password history and plaintext export from the previous version are removed.
+- Passwords are saved only after you press Save locally. Saved passwords and
+  optional labels are stored unencrypted in this browser's localStorage. Anyone
+  with access to the browser profile or same-origin scripts can read them. This
+  app does not send saved entries to a service; browser profile sync and backups
+  are outside its control.
+- Saved entries can be deleted individually or with Clear all. Clearing site
+  data in browser settings also removes them. Storage failures are reported and
+  existing unreadable data is not overwritten.
+- The previous version's `pwdHistory` format and plaintext export are not used
+  for the new saved list.
 - Existing `pwdHistory` data is detected without rendering it. Delete it using
   the confirmed Delete old history action on the same origin/browser profile.
   It is never deleted automatically; changing origins does not migrate it.
@@ -77,17 +94,17 @@ shuffled pieces, required random-character classes, look-alike filtering, invali
 bounds, rejected biased random values, missing secure randomness, and dictionary
 validation. The retained long-passphrase routine also has regression coverage.
 
-Browser checks performed during this update covered 320, 375, 390, 768, and 1440px
-layouts and the main controls, denied-clipboard fallback, and background masking.
-These are focused Chromium checks, not a full Safari/Firefox or accessibility
-certification. No Netlify deployment was performed.
+Browser checks covered password saving, reload persistence, masking, deletion,
+corrupt-storage handling, and 320, 375, 768, and 1440px layouts. These are focused
+Chromium checks, not a full Safari/Firefox or accessibility certification. No
+Netlify deployment was performed.
 
 ## Structure
 
 - [index.html](index.html): semantic interface and fallback CSP.
 - [styles.css](styles.css): mobile-first styles and reduced-motion handling.
 - [generator.js](generator.js): Web Crypto sampling and entropy calculations.
-- [app.js](app.js): UI, clipboard feedback, privacy controls, and legacy cleanup.
+- [app.js](app.js): UI, mode controls, clipboard feedback, local saves, privacy controls, and legacy cleanup.
 - [wordlist.js](wordlist.js): browser wrapper for the official EFF list.
 - [eff_large_wordlist.txt](eff_large_wordlist.txt): original EFF list.
 - [lucide.min.js](lucide.min.js): pinned, locally served Lucide 0.468.0 icons.

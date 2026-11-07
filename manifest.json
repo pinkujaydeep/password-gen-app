@@ -1,7 +1,7 @@
 {
   "name": "Passkee - Password Generator",
   "short_name": "Passkee",
-  "description": "Private, on-device 8-16 character random and memorable passwords",
+  "description": "Private, on-device random passwords, memorable passwords, and passphrases",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

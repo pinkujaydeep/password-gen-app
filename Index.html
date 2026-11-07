@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Create 8-16 character random or memorable word-based passwords privately on your device.">
+  <meta name="description" content="Create private random passwords, memorable passwords, and configurable passphrases on your device.">
   <meta name="theme-color" content="#f6f7f4">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <title>Passkee | Password Generator</title>
@@ -22,7 +22,7 @@
     <span class="local-badge"><span class="status-dot"></span>On-device only</span>
   </header>
   <main id="main" class="shell">
-    <div class="page-heading"><p class="eyebrow">ONE LESS THING TO WORRY ABOUT</p><h1>Password generator<span>.</span></h1></div>
+    <div class="page-heading"><p class="eyebrow">ONE LESS THING TO WORRY ABOUT</p><h1>Password generator<span>.</span></h1><p class="page-intro">Make a secure random password, a memorable one, or a passphrase that feels natural to type.</p></div>
     <div id="legacy-notice" class="notice" hidden><p>The previous version saved passwords in this browser. They have not been deleted.</p><button id="delete-legacy" class="text-button" type="button"><i data-lucide="trash-2"></i>Delete old history</button></div>
     <noscript><p class="notice">JavaScript is required for secure password generation.</p></noscript>
     <div class="workspace">
@@ -35,26 +35,45 @@
         </div>
         <div class="quality-row"><span class="quality-label" id="quality-label">Checking</span><span id="entropy">&mdash;</span></div>
         <meter id="strength" min="0" max="90" low="60" high="75" optimum="90" value="0" aria-label="Password strength"></meter>
-        <div class="primary-actions"><button id="copy" class="button primary" type="button" disabled><i data-lucide="copy"></i><span id="copy-label">Copy password</span></button><button id="generate" class="button secondary" type="button"><i data-lucide="refresh-cw"></i>Generate new</button></div>
+        <label class="save-label" for="save-label">Label for your saved password <span>optional</span></label>
+        <input id="save-label" class="save-input" type="text" maxlength="60" autocomplete="off" placeholder="e.g. email account">
+        <div class="primary-actions"><button id="copy" class="button primary" type="button" disabled><i data-lucide="copy"></i><span id="copy-label">Copy password</span></button><button id="generate" class="button secondary" type="button"><i data-lucide="refresh-cw"></i>Generate new</button><button id="save" class="button secondary save-action" type="button" disabled><i data-lucide="bookmark-plus"></i>Save locally</button></div>
         <p id="status" class="status" role="status" aria-live="polite" aria-atomic="true"></p>
-        <div class="security-note"><i data-lucide="shield-check"></i><div><h3>Yours. And only yours.</h3><p>New passwords are never saved or sent. Your clipboard may sync across devices.</p></div></div>
+        <div class="security-note"><i data-lucide="shield-alert"></i><div><h3>Local means unencrypted</h3><p>Only passwords you choose to save are stored in this browser. Anyone with access to this browser profile can read them. Your clipboard may also sync across devices.</p></div></div>
       </section>
       <section class="options-section" aria-labelledby="options-heading">
         <div class="section-top"><h2 id="options-heading">Preferences</h2><i data-lucide="sliders-horizontal"></i></div>
-        <fieldset class="mode-switch"><legend class="sr-only">Password type</legend><label><input type="radio" name="mode" value="compact" checked><span><i data-lucide="whole-word"></i>Memorable</span></label><label><input type="radio" name="mode" value="random"><span><i data-lucide="shuffle"></i>Random</span></label></fieldset>
-        <div class="range-heading"><label id="length-label" for="length">Password length</label><output id="length-value" for="length">16</output></div>
-        <input type="range" id="length" min="8" max="16" value="16" aria-describedby="range-description">
-        <div class="range-limits" id="range-description"><span id="range-min">8 characters</span><span id="range-max">16 characters</span></div>
+        <fieldset class="mode-switch"><legend class="sr-only">Password type</legend><label><input type="radio" name="mode" value="compact" checked><span><i data-lucide="whole-word"></i>Memorable</span></label><label><input type="radio" name="mode" value="random"><span><i data-lucide="shuffle"></i>Random</span></label><label><input type="radio" name="mode" value="passphrase"><span><i data-lucide="text"></i>Passphrase</span></label></fieldset>
+        <div id="length-controls">
+          <div class="range-heading"><label id="length-label" for="length">Password length</label><output id="length-value" for="length">16</output></div>
+          <input type="range" id="length" min="8" max="16" value="16" aria-describedby="range-description">
+          <div class="range-limits" id="range-description"><span id="range-min">8 characters</span><span id="range-max">16 characters</span></div>
+        </div>
         <div id="compact-details"><div class="select-row"><span>Words</span><span>2 whole words</span></div><div class="select-row"><span>Symbol</span><span>1 random symbol</span></div><div class="select-row"><span>Number</span><span id="digit-summary">3 random digits</span></div><div class="select-row"><span>Order</span><span>Shuffled</span></div></div>
         <div id="random-options" hidden>
           <label class="check-row"><span>Include numbers</span><input id="numbers" type="checkbox" role="switch" checked></label>
           <label class="check-row"><span>Include symbols</span><input id="symbols" type="checkbox" role="switch" checked></label>
           <label class="check-row" id="ambiguous-row"><span>Exclude look-alikes <small>Il1O0o</small></span><input id="ambiguous" type="checkbox" role="switch" checked></label>
         </div>
+        <div id="passphrase-options" hidden>
+          <div class="range-heading"><label for="phrase-words">Number of words</label><output id="phrase-words-value" for="phrase-words">6</output></div>
+          <input type="range" id="phrase-words" min="5" max="10" value="6" aria-describedby="phrase-range-description">
+          <div class="range-limits" id="phrase-range-description"><span>5 words</span><span>10 words</span></div>
+          <label class="select-row" for="phrase-separator"><span>Word separator</span><select id="phrase-separator"><option value=" ">Space</option><option value="/">Slash</option><option value=".">Period</option></select></label>
+          <label class="check-row"><span>Capitalize each word</span><input id="phrase-capitalize" type="checkbox" role="switch" checked></label>
+          <label class="check-row"><span>Add two digits</span><input id="phrase-numbers" type="checkbox" role="switch" checked></label>
+          <label class="check-row"><span>Add a symbol</span><input id="phrase-symbols" type="checkbox" role="switch" checked></label>
+        </div>
         <p class="compatibility-note limited" id="compatibility-note">Limited strength: short word patterns are easier to guess. Choose Random for sensitive accounts and enable MFA.</p>
         <button id="reset" class="text-button" type="button"><i data-lucide="rotate-ccw"></i>Reset preferences</button>
       </section>
     </div>
+    <section class="saved-section" aria-labelledby="saved-heading">
+      <div class="saved-heading-row"><div><p class="eyebrow">THIS BROWSER ONLY</p><h2 id="saved-heading">Saved passwords <span id="saved-count">(0)</span></h2></div><button id="clear-saved" class="text-button" type="button" disabled><i data-lucide="trash-2"></i>Clear all</button></div>
+      <p class="saved-warning">Saved entries are unencrypted browser data. Anyone using this browser profile can access them. Clear them here or clear this site's data in your browser settings.</p>
+      <p id="saved-empty" class="saved-empty">Nothing saved yet. Use “Save locally” to keep a password in this browser.</p>
+      <div id="saved-list" class="saved-list"></div>
+    </section>
     <section class="good-practice" aria-labelledby="practice-heading"><h2 id="practice-heading">A stronger everyday routine</h2><div class="practice-grid"><article><span class="practice-number">01</span><h3>One account. One password.</h3><p>A unique password keeps one breach from becoming many.</p></article><article><span class="practice-number">02</span><h3>Let a manager remember.</h3><p>Keep passwords in a trusted password manager, not notes or screenshots.</p></article><article><span class="practice-number">03</span><h3>Add a second layer.</h3><p>Choose a passkey or turn on multi-factor authentication when available.</p></article></div></section>
   </main>
   <footer class="shell"><span>Passkee. Keep it personal.</span><span>EFF word list <span class="footer-dot">/</span> No tracking</span></footer>
